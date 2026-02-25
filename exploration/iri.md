@@ -22,6 +22,65 @@ jupyter:
 ```
 
 ```python
+# testing DEV db connection
+
+from sqlalchemy import create_engine
+
+AZURE_DB_BASE_URL = "postgresql+psycopg2://{uid}:{pw}@{host}/postgres"
+
+# url = AZURE_DB_BASE_URL.format(
+#     uid="dbwriter",
+#     pw="ZtKH2080damg",
+#     host="chd-rasterstats-dev.postgres.database.azure.com",
+# )
+
+url = AZURE_DB_BASE_URL.format(
+    uid="dbreader",
+    pw="2Nm77aUwydFk",
+    host="chd-rasterstats-prod.postgres.database.azure.com",
+)
+
+# AZURE_DB_BASE_URL = "postgresql+psycopg2://{uid}:{pw}@{host}/listmonk"
+
+# url = AZURE_DB_BASE_URL.format(
+#     uid="listmonk_service",
+#     pw="Jpxco3nRPWzs39",
+#     host="chd-rasterstats-dev.postgres.database.azure.com",
+# )
+
+engine = create_engine(url)
+```
+
+```python
+query = "SELECT * FROM public.imerg LIMIT 100"
+
+with engine.connect() as conn:
+    df_test = pd.read_sql(query, conn)
+```
+
+```python
+query = "SELECT * FROM public.campaigns LIMIT 100"
+
+with engine.connect() as conn:
+    df_test = pd.read_sql(query, conn)
+```
+
+```python
+df_test
+```
+
+```python
+with stratus.get_engine(stage="dev", write=True).connect() as conn:
+    df_test = pd.read_sql(query, conn)
+```
+
+```python
+import os
+
+os.getenv("DSCI_AZ_DB_DEV_PW")
+```
+
+```python
 import calendar
 
 import ocha_stratus as stratus
