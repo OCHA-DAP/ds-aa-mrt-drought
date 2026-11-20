@@ -18,6 +18,8 @@
     return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const ordR = (r) => (Number.isInteger(r) ? ord(r) : "joint " + ord(Math.floor(r)));
   const nth = (r, w) => (r === 1 ? w : `${ordR(r)} ${w}`); // "lowest", not "1st lowest"
+  const since = (o, w) => (o.since ? `${w || "lowest"} since ${o.since}` : `${w || "lowest"} since 2001`);
+  const subFloor = (o) => o.value != null && o.value < CR.asi.floor;
   const sgn = (v, d) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d);
   const ser = (o, f) => YEARS.map((y) => ({ y, v: o[y] == null ? null : f ? f(+o[y]) : +o[y] }));
   const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
@@ -65,10 +67,11 @@
   function lead() {
     const s = "south", g = "guidimakha", R = D.rain.scopes, T = D.temp.scopes;
     const bio = D.biomass.scopes[s], vhi = CR.vhi.scopes[s], z = ZF.scopes[s];
-    const since = [...new Set([bio.raw.since, vhi.raw.since, z.raw.since])].sort();
+    const sinceYrs = [...new Set([bio.raw.since, vhi.raw.since, z.raw.since].map((x) => x || 2001))].sort();
     const stressed = D.south.filter((c) => CR.asi.adm1[c].value >= CR.asi.floor)
-      .sort((a, b) => CR.asi.adm1[b].value - CR.asi.adm1[a].value)
-      .map((c) => { const v = CR.asi.adm1[c].value; return `${D.names1[c]} ${v < 10 ? v.toFixed(1) : Math.round(v)}%`; });
+      .sort((a, b) => CR.asi.adm1[a].rank - CR.asi.adm1[b].rank)
+      .map((c) => { const o = CR.asi.adm1[c], v = o.value;
+        return `${D.names1[c]} (${v < 10 ? v.toFixed(1) : Math.round(v)}%, ${nth(o.rank, "highest")} since 2001)`; });
     const gr = R[g].jas, gs = R[g].series_jas;
     const near = YEARS.filter((y) => y !== Y).reduce((a, y) => (Math.abs(gs[y] - gs[Y]) < Math.abs(gs[a] - gs[Y]) ? y : a), YEARS[0]);
     const nearTxt = Math.abs(gs[near] - gs[Y]) < 3 ? `, level with ${near} (${Math.abs(gs[near] - gs[Y]).toFixed(0)} mm apart)` : "";
@@ -83,13 +86,13 @@
        ${nth(R[s].jas.rank_long, "lowest")} since 1981, ${fmtRP(R[s].jas.rp_long)}) and the season the ${ordR(T[s].detrended.rank)}
        hottest (${fmtRP(T[s].detrended.rp)}). October rain, ${R[s].oct.rank_wet === 1 ? "the wettest" : `the ${nth(R[s].oct.rank_wet, "wettest")}`}
        since 2001 (preliminary), narrowed the June–October deficit to ${fmtRP(R[s].jjaso.rp)}.</p>
-       <p>Biomass, crop vegetation health and rangeland vegetation were the lowest since ${since.join(" or ")}, but close to
+       <p>Biomass, crop vegetation health and rangeland vegetation were the lowest since ${sinceYrs.join(" or ")}, but close to
        the 2001–2025 average (biomass ${bio.raw.pct}%; ${rangeRP([bio.raw.rp, vhi.raw.rp, z.raw.rp])}). Treating the greener
        years since 2020 as a trend gives ${rangeRP([bio.detrended.rp, vhi.detrended.rp, z.detrended.rp])}. FAO's crop stress
        index stayed under ${CR.asi.floor}% of cropland except in ${stressed.join(", ")}.</p>
        <p><b>Guidimakha:</b> July–September rain ${gr.pct}% of average, the ${nth(gr.rank, "lowest")} since 2001${nearTxt};
        ${nth(gr.rank_long, "lowest")} since 1981 (${fmtRP(gr.rp_long)}). ECMWF rainfall shows a smaller deficit (${ecG.ecmwf_pct}%).
-       Biomass lowest since ${gb.raw.since} (${gb.raw.pct}% of average), rangeland lowest since ${gz.raw.since}; little crop stress.</p>
+       Biomass ${since(gb.raw)} (${gb.raw.pct}% of average), rangeland ${since(gz.raw)}; little crop stress.</p>
        <p><b>Window 2:</b> the framework had already activated through its forecast window in May. As a check only, today's
        final CHIRPS puts national rain since 1 July below the ${crossed.map(([l, d]) => `${l} threshold (by ${d.toFixed(1)} mm)`).join(" and the ")}.
        Since 2001 only ${past.slice(0, -1).join(", ")} and ${past.slice(-1)} had crossed them, all framework bad years.</p>`);
@@ -97,7 +100,7 @@
 
   function summary() {
     const veg = (o, word) => [o.raw.rp, o.detrended.rp,
-      `${ordR(o.raw.rank)} ${word} · lowest since ${o.raw.since}`];
+      `${ordR(o.raw.rank)} ${word} · ${since(o.raw)}`];
     const rows = [
       ["Rainfall, July–September", "CHIRPS", (sc) => { const o = D.rain.scopes[sc].jas;
         return [o.rp, null, `${nth(o.rank, "driest")} of ${o.n} · ${o.pct}% of average`]; }, true],
@@ -106,7 +109,8 @@
       ["Biomass, 1 April – 30 September", "GeoSahel (DMP)", (sc) => { const o = D.biomass.scopes[sc];
         const v = veg(o, "lowest"); v[2] = `${o.raw.pct}% of average · ${v[2]}`; return v; }],
       ["Crop stress (ASI), 1 October", "FAO ASIS, % of cropland", (sc) => { const o = CR.asi.scopes[sc];
-        return [o.rp, null, `${o.value.toFixed(1)}% of cropland stressed`]; }],
+        return subFloor(o) ? [null, null, `${o.value.toFixed(1)}% of cropland stressed`, `none (under ${CR.asi.floor}%)`]
+          : [o.rp, null, `${o.value.toFixed(1)}% of cropland stressed · ${nth(o.rank, "highest")}`]; }],
       ["Rangeland vegetation", "JRC ASAP zFPARc", (sc) => veg(ZF.scopes[sc], "lowest")],
       ["Surface water, October", "GeoSahel; record from 2020", (sc) => { const o = WA.scopes[sc];
         return [null, null, `${nth(o.rank, "lowest")} of ${o.n} Octobers · ${o.pct_2021}% of 2021–25`,
@@ -268,7 +272,7 @@
     yearBars("#barsVhi", ser(vs), { base: vref, worst: "lowest", short: (v) => v.toFixed(2),
       fmt: (x) => `VHI ${x.toFixed(2)}${isTrend() ? " (trend-adjusted)" : ""}`, axisFmt: (x) => x.toFixed(2) });
     d3.select("#vhiCap").text(`Bars from the 2001–2025 average; VHI runs from 0 (poor) to 1 (good). ${Y}:
-      ${nth(v.raw.rank, "lowest")} (${fmtRP(v.raw.rp)}), lowest since ${v.raw.since}; against trend ${ordR(v.detrended.rank)}
+      ${nth(v.raw.rank, "lowest")} (${fmtRP(v.raw.rp)}), ${since(v.raw)}; against trend ${ordR(v.detrended.rank)}
       (${fmtRP(v.detrended.rp)}).`);
     // rangeland
     const z = ZF.scopes[sc], zs = isTrend() ? z.series : z.series_raw, zref = mean(past.map((y) => z.series_raw[y]));
@@ -276,7 +280,7 @@
     yearBars("#barsZ", ser(zs), { base: zref, rankKey: isTrend() ? "zfparc_trend" : "zfparc", worst: "lowest", short: (v) => sgn(v, 2),
       fmt: (x) => `z ${sgn(x, 2)}${isTrend() ? " (trend-adjusted)" : ""}`, axisFmt: (x) => x.toFixed(1) });
     d3.select("#zCap").text(`Cumulative rangeland vegetation since the start of the season, as a z-score. ${Y}: ASAP's
-      z ${sgn(z.raw.value, 2)}, ${nth(z.raw.rank, "lowest")} (${fmtRP(z.raw.rp)}), lowest since ${z.raw.since}; against trend
+      z ${sgn(z.raw.value, 2)}, ${nth(z.raw.rank, "lowest")} (${fmtRP(z.raw.rp)}), ${since(z.raw)}; against trend
       ${ordR(z.detrended.rank)} (${fmtRP(z.detrended.rp)}).`);
     // water
     const w = WA.scopes[sc], wref = mean(WA.ref.map((y) => w.series[y]));
@@ -403,6 +407,8 @@
           (o.mean < 60 ? "<br><i>Arid: average under 60 mm</i>" : "") }; } });
     map("#mapAsi", { level: 1, fit: "south", aria: "Crop stress return period by wilaya",
       val: (c) => { const o = CR.asi.adm1[c]; if (!o) return null;
+        if (subFloor(o)) return { fill: SC[0], tip: `${o.value.toFixed(1)}% of cropland stressed at 1 October: none (under ${CR.asi.floor}%)
+          <br>${CR.weights[c]}% of the belt's cropland` };
         return { fill: rpFill(o), tip: `${o.value.toFixed(1)}% of cropland stressed at 1 October<br>${nth(o.rank, "highest")} · ${fmtRP(o.rp)}
           <br>${CR.weights[c]}% of the belt's cropland` }; } });
     map("#mapT", { level: 1, fit: "south", aria: "Temperature return period by wilaya",
@@ -444,7 +450,8 @@
       `<b>Boundaries</b>: COD-AB Mauritania v03, <a href="https://data.humdata.org/dataset/cod-ab-mrt">HDX</a>.`,
     ];
     d3.select("#srcList").html(li.map((x) => `<li>${x}</li>`).join(""));
-    d3.select("#asiR").text(`${CR.asi.r_national.toFixed(2)} against FAO's national annual ASI and ${CR.asi.r_guidimakha.toFixed(2)} in Guidimakha, 2001–2025`);
+    d3.select("#asiR").text(`${CR.asi.r_national.toFixed(3)} against FAO's national annual ASI (${CR.asi.r_national_no2002.toFixed(3)} without 2002;
+      typical difference ${CR.asi.rmse_national.toFixed(1)} points) and ${CR.asi.r_guidimakha.toFixed(3)} in Guidimakha, 2001–2025`);
     d3.select("#asiW").text(D.south.map((c) => `${D.names1[c]} ${CR.weights[c]}%`).join(", "));
     const miss = Object.entries(CR.vhi.missing).filter(([, v]) => v.length).map(([c, v]) => `${D.names1[c]} ${v.join(", ")}`);
     d3.select("#vhiMiss").text(miss.length ? `Missing dekads drop ${miss.join("; ")} from the VHI series; the belt mean re-weights the others.` : "");

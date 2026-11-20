@@ -434,13 +434,15 @@ ASI_FLOOR = (
 )
 
 
-def crops():
+def crops(area1):
     """FAO ASIS on cropland, the eight southern wilayas.
 
     ASI: FAO's dekadal ASI read at the 1 October dekad, the same dekad every year. It tracks
     FAO's annual ASI closely (checked below); later dekads read 0 once cropland is inactive.
-    VHI: season-mean weighted mean VHI, secondary. The belt is weighted by each wilaya's share
-    of cropland (ASIS's Relative_Area_Used_in_Computation, median over years).
+    VHI: season-mean weighted mean VHI, secondary. The belt is weighted by each wilaya's
+    cropland: ASIS's Relative_Area_Used_in_Computation (a share of the wilaya's own area;
+    median over July-September dekads, all years) times the wilaya's area. Checked against
+    FAO's national annual ASI below.
     """
     a = pd.read_csv(RAW / "asi_dekad.csv", parse_dates=["Date"])
     a = a.drop_duplicates(["Province", "Date"])
@@ -455,12 +457,13 @@ def crops():
     v["code"] = v.Province.map(FAO2P)
     v["year"] = v.Date.dt.year
     v["md"] = v.Date.dt.month * 100 + v.Date.dt.day
-    wt = (
-        v[v.md == 1001]
+    rel = (
+        v[(v.md >= 701) & (v.md <= 921)]
         .groupby("code")
         .Relative_Area_Used_in_Computation.median()
         .reindex(SOUTH)
     )
+    wt = rel * pd.Series(area1).reindex(SOUTH)
 
     def wmean(t):
         w = wt.values
@@ -477,7 +480,7 @@ def crops():
     def apack(s):
         # Most years sit near 0%; a stress share under 1% of cropland counts as no stress,
         # so trace values do not rank above zero years.
-        ranked = s.where(s >= ASI_FLOOR, 0)
+        ranked = s.where(s >= ASI_FLOOR, 0).where(s.notna())
         return {
             **summarise(ranked, "high", "diff"),
             "value": r(s.get(Y), 3),
@@ -496,6 +499,14 @@ def crops():
     ann["code"] = ann.PROVINCE.map(FAO2P).fillna(ann.PROVINCE)
     ann = ann.pivot_table(index="YEAR", columns="code", values="DATA")
     out["asi"]["annual_last_year"] = int(ann.index.max())
+    nat = ann["ALL"].reindex(REF)
+    out["asi"]["rmse_national"] = r(
+        float(np.sqrt(((asi_south.reindex(REF) - nat) ** 2).mean())), 2
+    )
+    out["asi"]["r_national_no2002"] = r(
+        np.corrcoef(asi_south.reindex(REF).drop(2002), nat.drop(2002))[0, 1],
+        3,
+    )
     out["asi"]["r_national"] = r(
         np.corrcoef(asi_south.reindex(REF), ann["ALL"].reindex(REF))[0, 1], 3
     )
@@ -679,7 +690,7 @@ def year_table(rain, bio, crop, past, temp):
             "biomass_trend": (b["series_ratio"], "low"),
             "asi": (
                 {
-                    y: (x if x is not None and x >= ASI_FLOOR else 0)
+                    y: (None if x is None else x if x >= ASI_FLOOR else 0)
                     for y, x in crop["asi"]["scopes"][sc]["series"].items()
                 },
                 "high",
@@ -703,7 +714,7 @@ def main():
     rain = rainfall(area1)
     rain["ecmwf_check"] = ecmwf_check()
     bio = biomass()
-    veg = crops()
+    veg = crops(area1)
     past = pastoral(area1)
     temp = temperature(area1)
     data = {

@@ -131,8 +131,8 @@ ranking. <span id="waterNote"></span></p>
     <div class="fighead">July–September rainfall, return period by wilaya</div>
     <div id="mapRain"></div>
     <div class="legend rpleg"></div>
-    <figcaption>Single-wilaya ranks are uncertain: CHIRPS and ECMWF rainfall agree only loosely at this scale
-    (r <span class="ecmwfR"></span>, 2001–2025).</figcaption>
+    <figcaption>Single-wilaya ranks are uncertain: CHIRPS and FAO's ECMWF rainfall agree only loosely by wilaya
+    (r <span class="ecmwfR"></span>, 2001–2025; partly because FAO's series covers cropland only).</figcaption>
     <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
   </figure>
 </div>
@@ -193,8 +193,9 @@ ranking. <span id="waterNote"></span></p>
   the series exist; each year uses the same dates as 2026. Return period = (n + 1) ÷ rank (Weibull), with n = 26.</li>
   <li><b>Areas.</b> <i>National</i> is the framework's trigger area: the average over every pixel in Mauritania, about half
   of it Saharan. The <i>southern belt</i> is the eight wilayas FAO monitors for crops (Hodh Ech Chargui, Hodh El Gharbi,
-  Assaba, Guidimakha, Gorgol, Brakna, Tagant, Trarza), averaged by area; FAO's crop indicators are weighted by each
-  wilaya's share of cropland as ASIS reports it (<span id="asiW"></span>). <i>Guidimakha</i> is where the framework's
+  Assaba, Guidimakha, Gorgol, Brakna, Tagant, Trarza), averaged by area. FAO's crop indicators are weighted by cropland:
+  ASIS's share of each wilaya used in the computation times the wilaya's area (<span id="asiW"></span> of the belt's
+  cropland). <i>Guidimakha</i> is where the framework's
   activities are.</li>
   <li><b>Rainfall.</b> CHIRPS dekadal totals by wilaya (WFP, on HDX), summed July–September (as in the framework
   analysis) and June–October. September is the last "final" month; October is preliminary. The Window 2 check uses the
@@ -211,7 +212,7 @@ ranking. <span id="waterNote"></span></p>
   +60% per decade are not ranked (<span id="steepList"></span>).</li>
   <li><b>Crops.</b> FAO ASIS's Agricultural Stress Index on cropland, read from its dekadal series at the 1 October dekad
   (later dekads fall to zero once cropland is inactive). It tracks FAO's published annual ASI: r <span id="asiR"></span>.
-  Shares under 1% of cropland count as no stress when ranking. Vegetation health (VHI) is ASIS's weighted mean VHI
+  Shares under 1% of cropland count as no stress when ranking and are shown as "none". Vegetation health (VHI) is ASIS's weighted mean VHI
   averaged over each wilaya's season dekads between 21 June and 1 November. <span id="vhiMiss"></span></li>
   <li><b>Rangeland.</b> JRC ASAP's z-score of cumulative FPAR on rangeland during the growing cycle, at the dekad of
   <span id="zDekad"></span>, the latest with data for every wilaya in every year (for any dekad from
@@ -231,6 +232,6 @@ ranking. <span id="waterNote"></span></p>
 </div>
 <div class="tip" id="tip" role="tooltip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="app.js?v=20261120g"></script>
+<script src="app.js?v=20261120h"></script>
 </body>
 </html>
