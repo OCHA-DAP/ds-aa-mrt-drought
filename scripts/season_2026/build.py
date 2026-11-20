@@ -101,6 +101,8 @@ def summarise(s: pd.Series, worst: str, kind: str) -> dict:
         for y in s.dropna().index
         if y != Y and ((s[y] < v) if worst == "low" else (s[y] > v))
     )
+    # "lowest since X": the most recent earlier year that was worse
+    out["since"] = max(out["worse_years"]) if out["worse_years"] else None
     return out
 
 
@@ -222,6 +224,7 @@ def rainfall(area1):
         d["year"], d["m"] = d.index.year, d.index.month
         jas = d[d.m.isin([7, 8, 9])].groupby("year").rfh.sum()
         jjaso = d[d.m.isin([6, 7, 8, 9, 10])].groupby("year").rfh.sum()
+        octo = d[d.m == 10].groupby("year").rfh.sum()
         long = jas[jas.index >= 1981]
         rs_long = rank_stats(long, "low")
         out["scopes"][key] = {
@@ -232,6 +235,11 @@ def rainfall(area1):
                 "rp_long": r(rs_long[Y][1]),
             },
             "jjaso": summarise(jjaso, "low", "ratio"),
+            # October alone (preliminary): how much it made up
+            "oct": {
+                "pct": r(100 * octo[Y] / octo.reindex(REF).mean(), 0),
+                "rank_wet": r(octo.reindex(YEARS).rank(ascending=False)[Y], 1),
+            },
             "series_jas": {int(y): r(v, 2) for y, v in jas.items() if y >= Y0},
         }
         # cumulative from 1 July, dekads Jul 1 .. Oct 21 (12 dekads)
@@ -390,6 +398,8 @@ def biomass():
             out["adm2"][c] = {
                 k: p[k] for k in ("detrended", "raw", "trend_pct_per_decade")
             }
+            # a ratio to a trend steeper than +60%/decade is unstable
+            out["adm2"][c]["steep"] = p["trend_pct_per_decade"] > 60
     # season curve (cumulative DMP from dekad 10), south and Guidimakha, all years
     curves = {}
     for key, codes in (("south", SOUTH), ("guidimakha", [GUIDI])):
@@ -418,15 +428,83 @@ def biomass():
     return out
 
 
-# --------------------------------------------------------------------------- crop VHI / ASI
-def vhi():
+# --------------------------------------------------------------------------- crops (ASI, VHI)
+ASI_FLOOR = (
+    1.0  # % of cropland; below this, ASI is treated as no stress when ranking
+)
+
+
+def crops():
+    """FAO ASIS on cropland, the eight southern wilayas.
+
+    ASI: FAO's dekadal ASI read at the 1 October dekad, the same dekad every year. It tracks
+    FAO's annual ASI closely (checked below); later dekads read 0 once cropland is inactive.
+    VHI: season-mean weighted mean VHI, secondary. The belt is weighted by each wilaya's share
+    of cropland (ASIS's Relative_Area_Used_in_Computation, median over years).
+    """
+    a = pd.read_csv(RAW / "asi_dekad.csv", parse_dates=["Date"])
+    a = a.drop_duplicates(["Province", "Date"])
+    a = a[(a.Date.dt.month == 10) & (a.Date.dt.day == 1)]
+    a["code"] = a.Province.map(FAO2P)
+    asi = a.pivot_table(
+        index=a.Date.dt.year, columns="code", values="Data"
+    ).reindex(YEARS)
+
     v = pd.read_csv(RAW / "mvhi_dekad.csv", parse_dates=["Date"])
     v = v.drop_duplicates(["Province", "Date"], keep="last")
     v["code"] = v.Province.map(FAO2P)
     v["year"] = v.Date.dt.year
     v["md"] = v.Date.dt.month * 100 + v.Date.dt.day
-    # 21 June .. 1 November, but ASIS reports each wilaya only inside its own season (11-14
-    # dekads). Use, for every year, exactly the dekads that wilaya has in 2026.
+    wt = (
+        v[v.md == 1001]
+        .groupby("code")
+        .Relative_Area_Used_in_Computation.median()
+        .reindex(SOUTH)
+    )
+
+    def wmean(t):
+        w = wt.values
+        num = (t[SOUTH] * w).sum(axis=1, min_count=1)
+        return num / (t[SOUTH].notna() * w).sum(axis=1)
+
+    out = {
+        "last": str(v.Date.max().date()),
+        "asi": {"floor": ASI_FLOOR},
+        "vhi": {},
+    }
+    out["weights"] = {c: r(x / wt.sum() * 100, 1) for c, x in wt.items()}
+
+    def apack(s):
+        # Most years sit near 0%; a stress share under 1% of cropland counts as no stress,
+        # so trace values do not rank above zero years.
+        ranked = s.where(s >= ASI_FLOOR, 0)
+        return {
+            **summarise(ranked, "high", "diff"),
+            "value": r(s.get(Y), 3),
+            "series": {int(y): r(x, 3) for y, x in s.items()},
+        }
+
+    asi_south = wmean(asi)
+    out["asi"]["scopes"] = {
+        "south": apack(asi_south),
+        "guidimakha": apack(asi[GUIDI]),
+    }
+    out["asi"]["adm1"] = {c: apack(asi[c]) for c in SOUTH}
+    # check against FAO's published annual ASI (2001-2025)
+    ann = pd.read_csv(RAW / "asi_annual.csv")
+    ann = ann[ann.CROP_MASK == "Cropland"]
+    ann["code"] = ann.PROVINCE.map(FAO2P).fillna(ann.PROVINCE)
+    ann = ann.pivot_table(index="YEAR", columns="code", values="DATA")
+    out["asi"]["annual_last_year"] = int(ann.index.max())
+    out["asi"]["r_national"] = r(
+        np.corrcoef(asi_south.reindex(REF), ann["ALL"].reindex(REF))[0, 1], 3
+    )
+    out["asi"]["r_guidimakha"] = r(
+        np.corrcoef(asi[GUIDI].reindex(REF), ann[GUIDI].reindex(REF))[0, 1], 3
+    )
+
+    # VHI: 21 June .. 1 November, but ASIS reports each wilaya only inside its own season
+    # (11-14 dekads). Use, for every year, exactly the dekads that wilaya has in 2026.
     win = v[(v.md >= 621) & (v.md <= 1101)]
     parts = []
     for c, g in win.groupby("code"):
@@ -435,39 +513,20 @@ def vhi():
         ok = g.groupby("year").md.nunique()
         parts.append(g[g.year.isin(ok[ok == len(mds)].index)])
     seas = (
-        pd.concat(parts).groupby(["year", "code"]).Data.mean().unstack("code")
+        pd.concat(parts)
+        .groupby(["year", "code"])
+        .Data.mean()
+        .unstack("code")
+        .reindex(YEARS)
     )
-    out = {
-        "window": "21 Jun - 1 Nov",
-        "last": str(v.Date.max().date()),
-        "adm1": {},
-        "scopes": {},
+    out["vhi"]["missing"] = {
+        c: [int(y) for y in seas.index[seas[c].isna()]] for c in SOUTH
     }
-    seas = seas.reindex(YEARS)
-    for c in SOUTH:
-        out["adm1"][c] = lin_pack(seas[c], 4)
-    south = seas[SOUTH].mean(
-        axis=1
-    )  # unweighted: ASIS publishes no cropland area per wilaya
-    out["scopes"]["south"] = lin_pack(south, 4)
-    out["scopes"]["guidimakha"] = lin_pack(seas[GUIDI], 4)
-    a = pd.read_csv(RAW / "asi_annual.csv")
-    a = a[a.CROP_MASK == "Cropland"]
-    a["code"] = a.PROVINCE.map(FAO2P).fillna(a.PROVINCE)
-    asi = a.pivot_table(index="YEAR", columns="code", values="DATA")
-    out["asi_official"] = {
-        "last_year": int(asi.index.max()),
-        "national": {
-            int(y): r(x, 1) for y, x in asi["ALL"].items() if y >= Y0
-        },
-        "guidimakha": {
-            int(y): r(x, 1) for y, x in asi[GUIDI].items() if y >= Y0
-        },
+    out["vhi"]["adm1"] = {c: lin_pack(seas[c], 4) for c in SOUTH}
+    out["vhi"]["scopes"] = {
+        "south": lin_pack(wmean(seas), 4),
+        "guidimakha": lin_pack(seas[GUIDI], 4),
     }
-    # does the season-mean VHI rank years like the official ASI? (Spearman, 2001-2025, south)
-    nat = asi["ALL"].reindex(REF)
-    rho = stats.spearmanr(south.reindex(REF), nat).statistic
-    out["rho_vhi_asi"] = r(rho, 2)
     return out
 
 
@@ -532,14 +591,24 @@ def pastoral(area1):
         "adm1": {},
         "adm2": {},
     }
-    for key, codes in (("south", SOUTH), ("guidimakha", [GUIDI])):
+    # Most open water in Trarza and Gorgol is the Senegal River valley and its lakes, so the
+    # pastoral figure is the other six wilayas; the full belt is kept for reference.
+    six = [c for c in SOUTH if c not in ("MR04", "MR06")]
+    ref2 = [y for y in ref if y > 2020]  # without the very wet 2020
+    for key, codes in (
+        ("south", six),
+        ("south_all", SOUTH),
+        ("guidimakha", [GUIDI]),
+    ):
         s = w1.loc[codes].sum()
         sw["scopes"][key] = {
             "series": {int(y): r(v, 1) for y, v in s.items()},
             "pct": r(100 * s[Y] / s[ref].mean(), 0),
+            "pct_2021": r(100 * s[Y] / s[ref2].mean(), 0),
             "rank": int(s.rank(method="min")[Y]),
             "n": len(s),
         }
+    sw["six"] = six
     for c in SOUTH:
         s = w1.loc[c]
         sw["adm1"][c] = {
@@ -596,29 +665,35 @@ def temperature(area1):
 
 
 # --------------------------------------------------------------------------- year table
-def year_table(rain, bio, veg, past, temp):
-    """Rank of every year 2001-2026 for each indicator, southern belt (Guidimakha in the second set)."""
+def year_table(rain, bio, crop, past, temp):
+    """Rank and RP of every year 2001-2026 per indicator, for the belt and for Guidimakha.
+
+    Vegetation is given twice: plain (against the 2001-2025 average) and trend-adjusted.
+    """
     tables = {}
-    for scope in ("south", "guidimakha"):
+    for sc in ("south", "guidimakha"):
+        b, z = bio["scopes"][sc], past["zfparc"]["scopes"][sc]
         series = {
-            "rain": (pd.Series(rain["scopes"][scope]["series_jas"]), "low"),
-            "biomass": (
-                pd.Series(bio["scopes"][scope]["series_ratio"]),
-                "low",
+            "rain": (rain["scopes"][sc]["series_jas"], "low"),
+            "biomass": (b["series_pct"], "low"),
+            "biomass_trend": (b["series_ratio"], "low"),
+            "asi": (
+                {
+                    y: (x if x is not None and x >= ASI_FLOOR else 0)
+                    for y, x in crop["asi"]["scopes"][sc]["series"].items()
+                },
+                "high",
             ),
-            "vhi": (pd.Series(veg["scopes"][scope]["series"]), "low"),
-            "zfparc": (
-                pd.Series(past["zfparc"]["scopes"][scope]["series"]),
-                "low",
-            ),
-            "temp": (pd.Series(temp["scopes"][scope]["series_anom"]), "high"),
+            "zfparc": (z["series_raw"], "low"),
+            "zfparc_trend": (z["series"], "low"),
+            "temp": (temp["scopes"][sc]["series_anom"], "high"),
         }
         tab = {}
-        for k, (s, worst) in series.items():
-            s.index = s.index.astype(int)
+        for k, (d, worst) in series.items():
+            s = pd.Series({int(y): x for y, x in d.items()}, dtype=float)
             rs = rank_stats(s.reindex(YEARS), worst)
             tab[k] = {y: [r(rk, 1), r(rp, 1)] for y, (rk, rp, n) in rs.items()}
-        tables[scope] = tab
+        tables[sc] = tab
     return tables
 
 
@@ -628,7 +703,7 @@ def main():
     rain = rainfall(area1)
     rain["ecmwf_check"] = ecmwf_check()
     bio = biomass()
-    veg = vhi()
+    veg = crops()
     past = pastoral(area1)
     temp = temperature(area1)
     data = {
@@ -641,7 +716,7 @@ def main():
         "names2": names2,
         "rain": rain,
         "biomass": bio,
-        "vhi": veg,
+        "crops": veg,
         "pastoral": past,
         "temp": temp,
         "ranks": year_table(rain, bio, veg, past, temp),
