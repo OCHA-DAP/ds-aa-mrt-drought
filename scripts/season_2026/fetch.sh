@@ -13,9 +13,10 @@ cd "$OUT"
 curl -sSL --max-time 600 -o chirps_hdx.csv \
   "https://data.humdata.org/dataset/7680b3f0-aa0a-45b3-8fc7-ddc29efdccc7/resource/ebc25750-7082-4b85-bef7-83601c7fb64d/download/mrt-rainfall-subnat-full.csv"
 
-# FAO GIEWS ASIS: annual Agricultural Stress Index and dekadal weighted mean VHI, cropland, by wilaya.
+# FAO GIEWS ASIS: Agricultural Stress Index (annual and dekadal) and dekadal weighted mean VHI, cropland, by wilaya.
 B="https://www.fao.org/giews/earthobservation/asis/data/country/MRT/MAP_ASI/DATA"
 curl -sSL --max-time 300 -o asi_annual.csv "$B/ASI_AnnualSummary_Season1_data.csv"
+curl -sSL --max-time 300 -o asi_dekad.csv "$B/ASI_Dekad_Season1_data.csv"
 curl -sSL --max-time 300 -o mvhi_dekad.csv "$B/MVHI_Dekad_Season1_data.csv"
 # ECMWF rainfall on cropland by wilaya (ASIS), only to cross-check CHIRPS and the ECMWF temperature.
 curl -sSL --max-time 300 -o ecmwf_rain_asis.csv \
