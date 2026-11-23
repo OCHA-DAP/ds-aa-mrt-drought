@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mauritania 2026 season review</title>
+<meta name="description" content="How severe was the 2026 rainy season in Mauritania? Rainfall, biomass, crop and rangeland vegetation, surface water and temperature compared with every season since 2001, by wilaya and moughataa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light;
+    --b5:#269777; --b6:#1e795f; --b7:#18614c; --b05:#e9f5f1; --b1:#d4eae4;
+    --n9:#1f2324; --n8:#3f4748; --n7:#5e6a6b; --n6:#7e8e8f; --n3:#c8d0d1; --n15:#e2e8e8; --n1:#ebeff0; --n05:#f5f7f7;
+    --s0:#e2e8e8; --s1:#eb9f63; --s2:#d9762f; --s3:#b04f14; --s4:#73300c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--n05); color: var(--n9); font: 400 15px/1.55 'Roboto', system-ui, sans-serif; }
+  .home-link { display: inline-block; margin: 10px 12px; padding: 6px 12px; font: 500 13px/1 'Roboto', system-ui, sans-serif;
+    color: var(--b6); background: var(--b05); border: 1px solid var(--b1); border-radius: 4px; text-decoration: none; }
+  .home-link:hover { background: var(--b1); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 56px; }
+  h1 { font-family: 'Merriweather', Georgia, serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 8px 0 6px; text-wrap: balance; }
+  h2 { font-size: 19px; font-weight: 700; margin: 36px 0 8px; color: var(--b7); border-bottom: 2px solid var(--b1); padding-bottom: 5px; scroll-margin-top: 60px; }
+  h3 { font-size: 15px; font-weight: 700; margin: 18px 0 4px; }
+  .sub { color: var(--n7); margin: 2px 0 14px; max-width: 82ch; }
+  p, li { max-width: 82ch; }
+  a { color: var(--b6); }
+  .lead { font-size: 16px; background: #fff; border: 1px solid var(--n15); border-left: 4px solid var(--s3); border-radius: 4px; padding: 12px 16px; margin: 14px 0; }
+  .lead p { margin: 4px 0; }
+  .note { color: var(--n7); font-size: 13px; margin: 4px 0 0; }
+  table { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid var(--n15); font-size: 13.5px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--n1); text-align: left; vertical-align: top; }
+  th { background: var(--n05); font-weight: 500; color: var(--n8); }
+  tr:last-child td { border-bottom: none; }
+  .tblwrap { overflow-x: auto; margin: 10px 0 4px; }
+  .rp { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .chip { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.08); }
+  .det { color: var(--n7); font-size: 12.5px; display: block; margin-top: 1px; }
+  .det2 { color: var(--n7); font-size: 12px; white-space: nowrap; }
+  .rp.sm { font-size: 12.5px; font-weight: 500; gap: 4px; }
+  .rp.sm .chip { width: 10px; height: 10px; }
+  td.na { color: var(--n6); }
+  figure { margin: 14px 0; background: #fff; border: 1px solid var(--n15); border-radius: 6px; padding: 12px 12px 8px; }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { color: var(--n7); font-size: 13px; padding: 8px 4px 2px; max-width: 100ch; }
+  .fighead { font-weight: 500; font-size: 14px; margin: 0 4px 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .grid2 > figure { margin: 0; }
+  .sec { margin: 14px 0; }
+  .bar { position: sticky; top: 0; z-index: 5; background: rgba(245,247,247,.96); backdrop-filter: blur(3px);
+    border-bottom: 1px solid var(--n15); padding: 8px 0; margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; color: var(--n7); }
+  .bar nav a { color: var(--n8); text-decoration: none; margin-right: 10px; white-space: nowrap; }
+  .bar nav a:hover { color: var(--b6); text-decoration: underline; }
+  .seg { display: inline-flex; }
+  .seg button { font: 500 13px/1 'Roboto', system-ui, sans-serif; cursor: pointer; padding: 7px 11px; margin-left: -1px;
+    border: 1px solid var(--b1); background: var(--b05); color: var(--b7); }
+  .seg button:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+  .seg button:last-child { border-radius: 0 4px 4px 0; }
+  .seg button.on { background: var(--b6); border-color: var(--b6); color: #fff; }
+  .seg button:focus-visible { outline: 2px solid var(--b7); outline-offset: 1px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--n8); margin: 6px 4px 0; align-items: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .tip { position: fixed; pointer-events: none; z-index: 20; background: #fff; border: 1px solid var(--n3); border-radius: 4px;
+    box-shadow: 0 4px 14px rgba(31,35,36,.14); padding: 7px 9px; font-size: 12.5px; line-height: 1.4; max-width: 280px; display: none; }
+  .tip b { font-weight: 700; }
+  .axis text { fill: var(--n7); font-size: 11px; }
+  .axis path, .axis line { stroke: var(--n3); }
+  .grid line { stroke: var(--n1); }
+  details.m { background: #fff; border: 1px solid var(--n15); border-radius: 6px; padding: 8px 14px; margin: 10px 0; }
+  details.m summary { cursor: pointer; font-weight: 500; color: var(--b7); }
+  details.m li { margin: 4px 0; font-size: 14px; }
+  .meta { color: var(--n7); font-size: 13px; border-top: 1px solid var(--n15); padding-top: 14px; margin-top: 40px; }
+  .disc { color: var(--n6); font-size: 11.5px; margin: 4px 4px 0; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } h1 { font-size: 22px; } th, td { padding: 6px 7px; } }
+</style>
+</head>
+<body>
+<a class="home-link" href="../">← All Mauritania drought analyses</a>
+<div class="wrap">
+
+<h1>How severe was Mauritania's 2026 rainy season?</h1>
+<p class="sub" id="sub">Rainfall, biomass, crops (FAO ASI), rangeland vegetation and surface water, and temperature in 2026,
+ranked against every season since 2001 (surface water: since 2020). Return periods count from the worst end.</p>
+
+<div class="bar" role="region" aria-label="Page controls">
+  <span>Area:</span>
+  <div class="seg" id="scopeSeg" role="group" aria-label="Area">
+    <button data-v="south" class="on" aria-pressed="true">Southern belt</button>
+    <button data-v="guidimakha" aria-pressed="false">Guidimakha</button>
+  </div>
+  <span>Vegetation against:</span>
+  <div class="seg" id="baseSeg" role="group" aria-label="Vegetation baseline">
+    <button data-v="plain" class="on" aria-pressed="true">2001–25 average</button>
+    <button data-v="trend" aria-pressed="false">trend</button>
+  </div>
+  <nav aria-label="Sections">
+    <a href="#summary">Summary</a><a href="#years">Vs past years</a><a href="#rain">Rainfall</a><a href="#biomass">Biomass</a>
+    <a href="#crops">Crops (ASI)</a><a href="#pastoral">Pastoral</a><a href="#temperature">Temperature</a><a href="#method">Method</a>
+  </nav>
+</div>
+
+<div class="lead" id="lead"></div>
+
+<h2 id="summary">Summary</h2>
+<div class="tblwrap"><table id="sumTable" aria-label="Summary of 2026 by indicator and area"></table></div>
+<div class="legend" id="rpLegend"></div>
+<p class="note">Return period = (number of seasons + 1) ÷ rank, 2001–2026; rank 1 gives 1-in-27, the longest this record can
+show. Vegetation is shown against the 2001–2025 average and, smaller, against its linear trend: the years since 2020 were
+much greener, so the two readings differ. <span id="longNote"></span> Crop stress under 1% of cropland counts as none when
+ranking. <span id="waterNote"></span></p>
+
+<h2 id="years">2026 against past seasons</h2>
+<figure>
+  <div class="fighead" id="heatTitle"></div>
+  <div id="heat"></div>
+  <figcaption>Number in each cell = rank from the worst end. Marked years (▲) are the framework's nine worst years
+  (2001, 2002, 2007, 2011, 2014, 2015, 2017, 2019, 2021). Biomass and rangeland follow the "Vegetation against" switch.</figcaption>
+</figure>
+
+<h2 id="rain">Rainfall (CHIRPS)</h2>
+<div class="grid2">
+  <figure>
+    <div class="fighead">Rain since 1 July <span class="seg" id="curveSeg" style="margin-left:8px">
+      <button data-v="national" aria-pressed="false">National</button><button data-v="south" class="on" aria-pressed="true">Southern belt</button><button data-v="guidimakha" aria-pressed="false">Guidimakha</button></span></div>
+    <div id="curve"></div>
+    <div class="legend" id="curveLegend"></div>
+    <figcaption id="curveCap"></figcaption>
+  </figure>
+  <figure>
+    <div class="fighead">July–September rainfall, return period by wilaya</div>
+    <div id="mapRain"></div>
+    <div class="legend rpleg"></div>
+    <figcaption>Single-wilaya ranks are uncertain: CHIRPS and FAO's ECMWF rainfall agree only loosely by wilaya
+    (r <span class="ecmwfR"></span>, 2001–2025; partly because FAO's series covers cropland only).</figcaption>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
+  </figure>
+</div>
+<figure><div class="fighead" id="barsRainHead"></div><div id="barsRain"></div><div class="legend barleg"></div></figure>
+
+<h2 id="biomass">Biomass (GeoSahel)</h2>
+<div class="grid2">
+  <figure><div class="fighead" id="barsBioHead"></div><div id="barsBio"></div><div class="legend barleg"></div>
+    <figcaption id="bioCap"></figcaption></figure>
+  <figure><div class="fighead" id="mapBioHead"></div><div id="mapBio"></div>
+    <div class="legend rpleg"></div>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p></figure>
+</div>
+
+<h2 id="crops">Crops: Agricultural Stress Index (FAO)</h2>
+<figure><div class="fighead" id="barsAsiHead"></div><div id="barsAsi"></div><div class="legend barleg"></div>
+  <figcaption>The share of cropland whose vegetation health since the start of the season is below FAO's stress level,
+  read at the 1 October dekad in every year. FAO's annual 2026 value comes after the season; this dekad tracks it closely.</figcaption></figure>
+<div class="grid2">
+  <figure><div class="fighead">Crop stress at 1 October, return period by wilaya</div><div id="mapAsi"></div>
+    <div class="legend rpleg"></div>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p></figure>
+  <figure><div class="fighead" id="barsVhiHead"></div><div id="barsVhi"></div><div class="legend barleg"></div>
+    <figcaption id="vhiCap"></figcaption></figure>
+</div>
+
+<h2 id="pastoral">Pastoral: rangeland vegetation and surface water</h2>
+<div class="grid2">
+  <figure><div class="fighead" id="barsZHead"></div><div id="barsZ"></div><div class="legend barleg"></div>
+    <figcaption id="zCap"></figcaption></figure>
+  <figure><div class="fighead" id="mapZHead"></div><div id="mapZ"></div>
+    <div class="legend rpleg"></div>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p></figure>
+</div>
+<div class="grid2">
+  <figure><div class="fighead" id="barsWHead"></div><div id="barsW"></div>
+    <figcaption>Open surface water in October, when the rains end and herds start to rely on ponds. The record starts in
+    October 2020, a very wet year, so it is too short for a return period.</figcaption></figure>
+  <figure><div class="fighead">October 2026 surface water, % of the 2020–2025 October average, by moughataa</div><div id="mapW"></div>
+    <div class="legend" id="wLegend"></div>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p></figure>
+</div>
+
+<h2 id="temperature">Temperature (ECMWF, via JRC ASAP)</h2>
+<div class="grid2">
+  <figure><div class="fighead" id="barsTHead"></div><div id="barsT"></div><div class="legend barleg"></div>
+    <figcaption id="tCap"></figcaption></figure>
+  <figure><div class="fighead">July–September temperature against trend, return period by wilaya</div><div id="mapT"></div>
+    <div class="legend rpleg"></div>
+    <p class="disc">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p></figure>
+</div>
+
+<h2 id="method">Method and sources</h2>
+<details class="m" id="m-sources"><summary>Sources and dates</summary><ul id="srcList"></ul></details>
+<details class="m" id="m-method"><summary>How each indicator is computed</summary>
+<ul>
+  <li><b>Common record.</b> Every indicator is ranked on 2001–2026, the framework's analysis period and the first year all
+  the series exist; each year uses the same dates as 2026. Return period = (n + 1) ÷ rank (Weibull), with n = 26.</li>
+  <li><b>Areas.</b> <i>National</i> is the framework's trigger area: the average over every pixel in Mauritania, about half
+  of it Saharan. The <i>southern belt</i> is the eight wilayas FAO monitors for crops (Hodh Ech Chargui, Hodh El Gharbi,
+  Assaba, Guidimakha, Gorgol, Brakna, Tagant, Trarza), averaged by area. FAO's crop indicators are weighted by cropland:
+  ASIS's share of each wilaya used in the computation times the wilaya's area (<span id="asiW"></span> of the belt's
+  cropland). <i>Guidimakha</i> is where the framework's
+  activities are.</li>
+  <li><b>Rainfall.</b> CHIRPS dekadal totals by wilaya (WFP, on HDX), summed July–September (as in the framework
+  analysis) and June–October. September is the last "final" month; October is preliminary. The Window 2 check uses the
+  framework's five national thresholds on cumulative rain since 1 July. Re-run on 2001–2025 with these data it is met in
+  2002, 2011, 2014, 2017 and 2019 only, as in the framework's own backtest (5 of 9 bad years, no false alarms).</li>
+  <li><b>Vegetation and the trend.</b> Biomass, FAO VHI and ASAP's rangeland z-score all rose over 2001–2025, but mostly as
+  a step up since 2020, not a steady trend (biomass: not significant). Each is shown against the plain 2001–2025 average
+  and against a linear trend fitted on 2001–2025 (the Chad framework's biomass trigger uses a ratio to trend). The plain
+  reading is the default. Neither separates the framework's bad years clearly better than the other.</li>
+  <li><b>Biomass.</b> GeoSahel dry matter production (Copernicus DMP, processed by Action contre la Faim), summed from
+  1 April (dekad 10) to 30 September (dekad 27), the last dekad published. GeoSahel's own 2026 total on its portal
+  completes the year with average values and differs from this. Moughataas with under 5% of the median southern
+  moughataa's biomass are marked arid (<span id="aridList"></span>); against trend, moughataas whose trend exceeds
+  +60% per decade are not ranked (<span id="steepList"></span>).</li>
+  <li><b>Crops.</b> FAO ASIS's Agricultural Stress Index on cropland, read from its dekadal series at the 1 October dekad
+  (later dekads fall to zero once cropland is inactive). It tracks FAO's published annual ASI: r <span id="asiR"></span>.
+  Shares under 1% of cropland count as no stress when ranking and are shown as "none". Vegetation health (VHI) is ASIS's weighted mean VHI
+  averaged over each wilaya's season dekads between 21 June and 1 November. <span id="vhiMiss"></span></li>
+  <li><b>Rangeland.</b> JRC ASAP's z-score of cumulative FPAR on rangeland during the growing cycle, at the dekad of
+  <span id="zDekad"></span>, the latest with data for every wilaya in every year (for any dekad from
+  1 September, ranks move little). This is satellite vegetation like the biomass indicator, not independent evidence.</li>
+  <li><b>Surface water.</b> GeoSahel monthly open-water area (km²) by wilaya and moughataa, October values, from October
+  2020. Moughataas with under 0.5 km² of water on average are left blank.</li>
+  <li><b>Temperature.</b> JRC ASAP's ECMWF reanalysis temperature on the rangeland mask, July–September mean, compared with
+  a Theil–Sen trend fitted on 1989–2025. A reanalysis with too little rain can run hot. In the seven wilayas FAO's
+  ECMWF rainfall covers (July–September 2026, % of 2001–2025 average, ECMWF vs CHIRPS: <span id="ecmwf"></span>), ECMWF
+  is clearly drier only in Hodh Ech Chargui; Tagant could not be checked. The hottest wilayas, Brakna and Trarza, have
+  ECMWF rain as wet as CHIRPS or wetter. These two series use different masks (cropland vs whole wilaya).</li>
+  <li><b>Wilaya maps.</b> ASAP and FAO report on older GAUL units, matched to COD-AB v03 wilayas by name. ASAP has no
+  separate Inchiri, Tiris Zemmour or Nouakchott; FAO covers only the southern belt.</li>
+</ul></details>
+
+<p class="meta" id="meta"></p>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="app.js?v=20261120h"></script>
+</body>
+</html>
